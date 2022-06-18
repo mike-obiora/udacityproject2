@@ -1,0 +1,23 @@
+Description: Mike Obiora - S3 Bucket for WebServer.
+###################################
+Parameters:
+  EnvironmentName:
+    Description: Will be prefixed to all resources names.
+    Type: String
+  BucketName:
+    Description: Name of the bucket to store web app source files.
+    Type: String
+###################################
+Resources:
+  WebAppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+    DeletionPolicy: Delete
+###################################
+Outputs:
+  Bucket:
+    Value: !Ref WebServerBucket
+    Description: Bucket with html content
+    Export:
+      Name: !Sub ${EnvironmentName}-BucketData

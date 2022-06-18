@@ -1,0 +1,55 @@
+Description: Mike Obiora - IAM roles for WebServer deployment.
+#####################################
+Parameters:
+  EnvironmentName:
+    Description: Will be prefixed to all resources names
+    Type: String
+#####################################
+Resources:
+  WebServer:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+  WebServerPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${EnvironmentName}-WebApp-Policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "s3:GetObject"
+            Resource:
+              !Join [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  Fn::ImportValue: !Sub "${EnvironmentName}-BucketData",
+                  /*,
+                ],
+              ]
+      Roles:
+        - !Ref WebServer
+
+  WebServerInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref WebServer
+Outputs:
+  InstanceProfile:
+    Description: Istance Profile for the web app server to access s3 bucket
+    Value: !Ref WebServerInstanceProfile
+    Export:
+      Name: !Sub "${EnvironmentName}-InstanceProfile"
